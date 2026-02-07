@@ -2,1113 +2,204 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Portfolio MVP</title>
+<title>Portfolio Control Room</title>
 <style>
-body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 32px; background: #0b111b; color: #f1f5f9; }
-h1 { font-size: 28px; margin-bottom: 4px; }
-.summary { margin-bottom: 24px; font-size: 15px; color: #cbd5f5; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 24px; background: #050b16; color: #f8fafc; }
+h1 { font-size: 28px; margin-bottom: 6px; }
+.summary { margin-bottom: 16px; font-size: 15px; color: #cbd5f5; }
 strong { color: #fef08a; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.data-table thead tr { background: #111b2f; text-align: left; }
-.data-table th, .data-table td { padding: 8px 10px; border-bottom: 1px solid rgba(148, 163, 184, 0.2); }
-.data-table tr:nth-child(even) { background: rgba(15, 23, 42, 0.65); }
-.badge-loss { color: #f87171; }
-.badge-gain { color: #34d399; }
+#controls { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
+#controls input { flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(148,163,184,.3); background: #0f172a; color: #f8fafc; }
+button.sort-btn { padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(148,163,184,.3); background: #111b2f; color: #f8fafc; cursor: pointer; }
+button.sort-btn.active { border-color: #38bdf8; color: #38bdf8; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead { background: #0f172a; }
+th, td { padding: 8px 10px; border-bottom: 1px solid rgba(148, 163, 184, 0.2); text-align: left; }
+tr:nth-child(even) { background: rgba(15, 23, 42, 0.65); }
+tr:hover { background: rgba(59,130,246,.15); cursor: pointer; }
+.badge-profit { color: #34d399; font-weight: 600; }
+.badge-loss { color: #f87171; font-weight: 600; }
+#detail-modal { position: fixed; inset: 0; background: rgba(5,11,22,.9); display: none; align-items: center; justify-content: center; padding: 32px; z-index: 1000; }
+#detail-card { width: min(900px, 90vw); background: #0b111f; border-radius: 16px; padding: 24px; border: 1px solid rgba(56,189,248,.2); }
+#detail-card header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+#detail-card button { background: transparent; border: 0; color: #94a3b8; font-size: 24px; cursor: pointer; }
+#alert { margin-top: 12px; font-size: 13px; color: #fbbf24; }
 footer { margin-top: 24px; font-size: 12px; color: #94a3b8; }
 </style>
 </head>
 <body>
-  <h1>Portfolio MVP</h1>
+  <h1>Portfolio Control Room</h1>
   <div class="summary">
-    Snapshot generated 2026-02-04 10:00:31 ET. Holdings shown: <strong>82</strong>.
-    Total cost basis: <strong>$95,331.23</strong> · Current value: <strong>$96,915.22</strong>
-    · Net: <strong>$1,584.00 (+1.7%)</strong>
+    Snapshot generated 2026-02-06 20:51:16 ET. Holdings shown: <strong>82</strong>. Cost basis <strong>$95,331.23</strong> · Market value <strong>$96,915.22</strong> · Net <strong>$1,584.00 (+1.7%)</strong>
   </div>
-  <table class="dataframe data-table">
-  <thead>
-    <tr style="text-align: right;">
-      <th>Name</th>
-      <th>Symbol</th>
-      <th>Units</th>
-      <th>Buy</th>
-      <th>Current</th>
-      <th>CostBasis</th>
-      <th>CurrentValue</th>
-      <th>Δ vs Buy</th>
-      <th>Δ vs Dec 19</th>
-      <th>Δ Today</th>
-      <th>Δ Today %</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>GoodRx</td>
-      <td>GDRX</td>
-      <td>100.00</td>
-      <td>$4.34</td>
-      <td>$2.16</td>
-      <td>$434.00</td>
-      <td>$216.00</td>
-      <td>-50.2%</td>
-      <td>-21.2%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Fiserv</td>
-      <td>FISV</td>
-      <td>20.00</td>
-      <td>$101.93</td>
-      <td>$58.12</td>
-      <td>$2,038.60</td>
-      <td>$1,162.40</td>
-      <td>-43.0%</td>
-      <td>-14.2%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Sweetgreen</td>
-      <td>SG</td>
-      <td>38.00</td>
-      <td>$9.83</td>
-      <td>$6.09</td>
-      <td>$373.54</td>
-      <td>$231.42</td>
-      <td>-38.0%</td>
-      <td>-11.9%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Adobe</td>
-      <td>ADBE</td>
-      <td>0.50</td>
-      <td>$355.06</td>
-      <td>$271.93</td>
-      <td>$177.53</td>
-      <td>$135.97</td>
-      <td>-23.4%</td>
-      <td>-23.6%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Salesforce</td>
-      <td>CRM</td>
-      <td>31.06</td>
-      <td>$241.07</td>
-      <td>$196.38</td>
-      <td>$7,487.21</td>
-      <td>$6,099.22</td>
-      <td>-18.5%</td>
-      <td>-24.2%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>CAVA</td>
-      <td>CAVA</td>
-      <td>18.48</td>
-      <td>$74.73</td>
-      <td>$60.89</td>
-      <td>$1,381.21</td>
-      <td>$1,125.41</td>
-      <td>-18.5%</td>
-      <td>+7.0%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Progressive</td>
-      <td>PGR</td>
-      <td>11.00</td>
-      <td>$246.72</td>
-      <td>$201.03</td>
-      <td>$2,715.06</td>
-      <td>$2,212.26</td>
-      <td>-18.5%</td>
-      <td>-10.6%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Lululemon</td>
-      <td>LULU</td>
-      <td>47.16</td>
-      <td>$207.69</td>
-      <td>$171.57</td>
-      <td>$9,795.50</td>
-      <td>$8,091.93</td>
-      <td>-17.4%</td>
-      <td>-17.5%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Microsoft</td>
-      <td>MSFT</td>
-      <td>5.10</td>
-      <td>$490.54</td>
-      <td>$411.21</td>
-      <td>$2,501.75</td>
-      <td>$2,097.17</td>
-      <td>-16.2%</td>
-      <td>-14.9%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Cloudflare</td>
-      <td>NET</td>
-      <td>2.00</td>
-      <td>$195.73</td>
-      <td>$170.31</td>
-      <td>$391.46</td>
-      <td>$340.62</td>
-      <td>-13.0%</td>
-      <td>-13.5%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Diageo</td>
-      <td>DEO</td>
-      <td>13.29</td>
-      <td>$106.63</td>
-      <td>$93.11</td>
-      <td>$1,417.63</td>
-      <td>$1,237.89</td>
-      <td>-12.7%</td>
-      <td>+3.8%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Uber</td>
-      <td>UBER</td>
-      <td>8.03</td>
-      <td>$87.79</td>
-      <td>$77.93</td>
-      <td>$704.79</td>
-      <td>$625.64</td>
-      <td>-11.2%</td>
-      <td>-1.3%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>UnitedHealth</td>
-      <td>UNH</td>
-      <td>22.13</td>
-      <td>$310.83</td>
-      <td>$284.18</td>
-      <td>$6,877.40</td>
-      <td>$6,287.75</td>
-      <td>-8.6%</td>
-      <td>-13.7%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Novo Nordisk</td>
-      <td>NVO</td>
-      <td>50.39</td>
-      <td>$53.03</td>
-      <td>$50.30</td>
-      <td>$2,672.41</td>
-      <td>$2,534.84</td>
-      <td>-5.1%</td>
-      <td>+3.8%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>S&P Global</td>
-      <td>SPGI</td>
-      <td>4.00</td>
-      <td>$493.29</td>
-      <td>$468.21</td>
-      <td>$1,973.16</td>
-      <td>$1,872.84</td>
-      <td>-5.1%</td>
-      <td>-8.6%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Mondelez</td>
-      <td>MDLZ</td>
-      <td>0.09</td>
-      <td>$62.08</td>
-      <td>$59.47</td>
-      <td>$5.48</td>
-      <td>$5.25</td>
-      <td>-4.2%</td>
-      <td>+7.9%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Visa</td>
-      <td>V</td>
-      <td>0.21</td>
-      <td>$342.00</td>
-      <td>$328.93</td>
-      <td>$71.03</td>
-      <td>$68.31</td>
-      <td>-3.8%</td>
-      <td>-5.5%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Block</td>
-      <td>XYZ</td>
-      <td>10.05</td>
-      <td>$58.77</td>
-      <td>$56.79</td>
-      <td>$590.64</td>
-      <td>$570.74</td>
-      <td>-3.4%</td>
-      <td>-13.1%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Procter & Gamble</td>
-      <td>PG</td>
-      <td>20.23</td>
-      <td>$157.73</td>
-      <td>$155.32</td>
-      <td>$3,191.40</td>
-      <td>$3,142.63</td>
-      <td>-1.5%</td>
-      <td>+7.6%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Palo Alto Networks</td>
-      <td>PANW</td>
-      <td>0.17</td>
-      <td>$168.04</td>
-      <td>$166.24</td>
-      <td>$27.92</td>
-      <td>$27.62</td>
-      <td>-1.1%</td>
-      <td>-11.3%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Airbnb</td>
-      <td>ABNB</td>
-      <td>1.00</td>
-      <td>$123.26</td>
-      <td>$122.08</td>
-      <td>$123.26</td>
-      <td>$122.08</td>
-      <td>-1.0%</td>
-      <td>-9.9%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Snowflake</td>
-      <td>SNOW</td>
-      <td>0.17</td>
-      <td>$172.85</td>
-      <td>$173.24</td>
-      <td>$29.42</td>
-      <td>$29.48</td>
-      <td>+0.2%</td>
-      <td>-22.6%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>e.l.f. Beauty</td>
-      <td>ELF</td>
-      <td>7.05</td>
-      <td>$83.49</td>
-      <td>$84.81</td>
-      <td>$588.60</td>
-      <td>$597.91</td>
-      <td>+1.6%</td>
-      <td>+5.4%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Pfizer</td>
-      <td>PFE</td>
-      <td>0.21</td>
-      <td>$25.35</td>
-      <td>$25.77</td>
-      <td>$5.39</td>
-      <td>$5.48</td>
-      <td>+1.7%</td>
-      <td>+1.8%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>CrowdStrike Holdings</td>
-      <td>CRWD</td>
-      <td>0.12</td>
-      <td>$408.17</td>
-      <td>$421.73</td>
-      <td>$47.09</td>
-      <td>$48.66</td>
-      <td>+3.3%</td>
-      <td>-13.2%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Chipotle</td>
-      <td>CMG</td>
-      <td>58.00</td>
-      <td>$37.50</td>
-      <td>$39.17</td>
-      <td>$2,175.00</td>
-      <td>$2,271.86</td>
-      <td>+4.5%</td>
-      <td>+3.7%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>McDonald's</td>
-      <td>MCD</td>
-      <td>8.63</td>
-      <td>$304.77</td>
-      <td>$319.48</td>
-      <td>$2,630.27</td>
-      <td>$2,757.22</td>
-      <td>+4.8%</td>
-      <td>+0.8%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Deckers Outdoor</td>
-      <td>DECK</td>
-      <td>7.00</td>
-      <td>$106.87</td>
-      <td>$113.34</td>
-      <td>$748.09</td>
-      <td>$793.38</td>
-      <td>+6.1%</td>
-      <td>+14.7%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Costco</td>
-      <td>COST</td>
-      <td>3.13</td>
-      <td>$921.15</td>
-      <td>$977.92</td>
-      <td>$2,883.57</td>
-      <td>$3,061.28</td>
-      <td>+6.2%</td>
-      <td>+14.6%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>GE HealthCare</td>
-      <td>GEHC</td>
-      <td>12.01</td>
-      <td>$73.72</td>
-      <td>$78.78</td>
-      <td>$885.07</td>
-      <td>$945.82</td>
-      <td>+6.9%</td>
-      <td>-5.5%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Alibaba</td>
-      <td>BABA</td>
-      <td>5.10</td>
-      <td>$151.22</td>
-      <td>$163.65</td>
-      <td>$771.22</td>
-      <td>$834.62</td>
-      <td>+8.2%</td>
-      <td>+8.4%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Boeing</td>
-      <td>BA</td>
-      <td>25.00</td>
-      <td>$213.81</td>
-      <td>$233.15</td>
-      <td>$5,345.25</td>
-      <td>$5,828.75</td>
-      <td>+9.0%</td>
-      <td>+8.4%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Amazon</td>
-      <td>AMZN</td>
-      <td>15.02</td>
-      <td>$216.63</td>
-      <td>$238.62</td>
-      <td>$3,254.23</td>
-      <td>$3,584.57</td>
-      <td>+10.2%</td>
-      <td>+4.5%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Meta Platforms</td>
-      <td>META</td>
-      <td>22.02</td>
-      <td>$627.16</td>
-      <td>$691.70</td>
-      <td>$13,808.15</td>
-      <td>$15,229.12</td>
-      <td>+10.3%</td>
-      <td>+4.0%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Starbucks</td>
-      <td>SBUX</td>
-      <td>10.39</td>
-      <td>$82.92</td>
-      <td>$93.04</td>
-      <td>$861.24</td>
-      <td>$966.35</td>
-      <td>+12.2%</td>
-      <td>+4.9%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Nike</td>
-      <td>NKE</td>
-      <td>1.27</td>
-      <td>$53.58</td>
-      <td>$60.93</td>
-      <td>$67.84</td>
-      <td>$77.15</td>
-      <td>+13.7%</td>
-      <td>+4.4%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Home Depot</td>
-      <td>HD</td>
-      <td>2.31</td>
-      <td>$334.58</td>
-      <td>$381.10</td>
-      <td>$773.58</td>
-      <td>$881.14</td>
-      <td>+13.9%</td>
-      <td>+9.9%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Coca-Cola</td>
-      <td>KO</td>
-      <td>38.50</td>
-      <td>$66.50</td>
-      <td>$76.89</td>
-      <td>$2,559.93</td>
-      <td>$2,959.90</td>
-      <td>+15.6%</td>
-      <td>+9.1%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Qualcomm</td>
-      <td>QCOM</td>
-      <td>0.02</td>
-      <td>$124.83</td>
-      <td>$147.18</td>
-      <td>$1.99</td>
-      <td>$2.34</td>
-      <td>+17.9%</td>
-      <td>-16.2%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Target</td>
-      <td>TGT</td>
-      <td>42.24</td>
-      <td>$92.30</td>
-      <td>$111.30</td>
-      <td>$3,899.07</td>
-      <td>$4,701.70</td>
-      <td>+20.6%</td>
-      <td>+14.5%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>PepsiCo</td>
-      <td>PEP</td>
-      <td>0.00</td>
-      <td>$132.33</td>
-      <td>$162.85</td>
-      <td>$0.02</td>
-      <td>$0.02</td>
-      <td>+23.1%</td>
-      <td>+9.6%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>IBM</td>
-      <td>IBM</td>
-      <td>0.10</td>
-      <td>$238.29</td>
-      <td>$294.31</td>
-      <td>$23.83</td>
-      <td>$29.43</td>
-      <td>+23.5%</td>
-      <td>-2.5%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Disney</td>
-      <td>DIS</td>
-      <td>0.83</td>
-      <td>$81.24</td>
-      <td>$104.22</td>
-      <td>$67.24</td>
-      <td>$86.26</td>
-      <td>+28.3%</td>
-      <td>-6.5%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>UPS</td>
-      <td>UPS</td>
-      <td>12.14</td>
-      <td>$87.16</td>
-      <td>$111.85</td>
-      <td>$1,057.89</td>
-      <td>$1,357.56</td>
-      <td>+28.3%</td>
-      <td>+9.9%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Blackrock, Inc.</td>
-      <td>BLK</td>
-      <td>0.06</td>
-      <td>$799.15</td>
-      <td>$1,070.08</td>
-      <td>$49.83</td>
-      <td>$66.72</td>
-      <td>+33.9%</td>
-      <td>+0.9%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Toyota</td>
-      <td>TM</td>
-      <td>0.04</td>
-      <td>$172.32</td>
-      <td>$231.42</td>
-      <td>$7.55</td>
-      <td>$10.14</td>
-      <td>+34.3%</td>
-      <td>+5.0%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>American Airlines</td>
-      <td>AAL</td>
-      <td>3.79</td>
-      <td>$10.42</td>
-      <td>$14.01</td>
-      <td>$39.48</td>
-      <td>$53.08</td>
-      <td>+34.5%</td>
-      <td>-11.3%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Exxon Mobil</td>
-      <td>XOM</td>
-      <td>2.00</td>
-      <td>$105.84</td>
-      <td>$143.73</td>
-      <td>$211.68</td>
-      <td>$287.46</td>
-      <td>+35.8%</td>
-      <td>+23.5%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Tesla</td>
-      <td>TSLA</td>
-      <td>0.10</td>
-      <td>$305.97</td>
-      <td>$421.96</td>
-      <td>$30.60</td>
-      <td>$42.20</td>
-      <td>+37.9%</td>
-      <td>-12.6%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Lockheed</td>
-      <td>LMT</td>
-      <td>15.07</td>
-      <td>$452.98</td>
-      <td>$628.26</td>
-      <td>$6,828.25</td>
-      <td>$9,470.43</td>
-      <td>+38.7%</td>
-      <td>+32.3%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Apple</td>
-      <td>AAPL</td>
-      <td>0.03</td>
-      <td>$191.79</td>
-      <td>$269.48</td>
-      <td>$6.08</td>
-      <td>$8.54</td>
-      <td>+40.5%</td>
-      <td>-0.3%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Eli Lilly</td>
-      <td>LLY</td>
-      <td>0.01</td>
-      <td>$688.65</td>
-      <td>$1,003.46</td>
-      <td>$9.59</td>
-      <td>$13.97</td>
-      <td>+45.7%</td>
-      <td>-6.4%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Lyft</td>
-      <td>LYFT</td>
-      <td>0.02</td>
-      <td>$11.33</td>
-      <td>$16.76</td>
-      <td>$0.17</td>
-      <td>$0.25</td>
-      <td>+47.9%</td>
-      <td>-13.9%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Delta Air Lines</td>
-      <td>DAL</td>
-      <td>10.17</td>
-      <td>$47.32</td>
-      <td>$70.44</td>
-      <td>$481.28</td>
-      <td>$716.43</td>
-      <td>+48.9%</td>
-      <td>-0.6%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>American Express</td>
-      <td>AXP</td>
-      <td>0.04</td>
-      <td>$234.69</td>
-      <td>$349.63</td>
-      <td>$9.23</td>
-      <td>$13.76</td>
-      <td>+49.0%</td>
-      <td>-7.2%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Shopify</td>
-      <td>SHOP</td>
-      <td>0.01</td>
-      <td>$79.60</td>
-      <td>$119.29</td>
-      <td>$0.49</td>
-      <td>$0.73</td>
-      <td>+49.9%</td>
-      <td>-30.3%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Merck</td>
-      <td>MRK</td>
-      <td>0.01</td>
-      <td>$77.03</td>
-      <td>$115.84</td>
-      <td>$0.78</td>
-      <td>$1.17</td>
-      <td>+50.4%</td>
-      <td>+14.1%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Celsius</td>
-      <td>CELH</td>
-      <td>0.10</td>
-      <td>$33.26</td>
-      <td>$50.36</td>
-      <td>$3.33</td>
-      <td>$5.04</td>
-      <td>+51.4%</td>
-      <td>+18.6%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Hasbro</td>
-      <td>HAS</td>
-      <td>1.06</td>
-      <td>$61.74</td>
-      <td>$94.66</td>
-      <td>$65.60</td>
-      <td>$100.58</td>
-      <td>+53.3%</td>
-      <td>+15.2%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Johnson & Johnson</td>
-      <td>JNJ</td>
-      <td>0.02</td>
-      <td>$149.31</td>
-      <td>$233.10</td>
-      <td>$2.50</td>
-      <td>$3.91</td>
-      <td>+56.1%</td>
-      <td>+12.0%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Bank of America</td>
-      <td>BAC</td>
-      <td>0.08</td>
-      <td>$34.39</td>
-      <td>$54.45</td>
-      <td>$2.79</td>
-      <td>$4.42</td>
-      <td>+58.3%</td>
-      <td>-1.3%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>AMD</td>
-      <td>AMD</td>
-      <td>0.01</td>
-      <td>$152.83</td>
-      <td>$242.11</td>
-      <td>$0.92</td>
-      <td>$1.46</td>
-      <td>+58.4%</td>
-      <td>+12.7%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>GM</td>
-      <td>GM</td>
-      <td>1.00</td>
-      <td>$52.38</td>
-      <td>$85.71</td>
-      <td>$52.51</td>
-      <td>$85.93</td>
-      <td>+63.6%</td>
-      <td>+4.2%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Citigroup</td>
-      <td>C</td>
-      <td>0.08</td>
-      <td>$70.57</td>
-      <td>$117.71</td>
-      <td>$5.33</td>
-      <td>$8.89</td>
-      <td>+66.8%</td>
-      <td>+2.1%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Alphabet Class A</td>
-      <td>GOOGL</td>
-      <td>0.02</td>
-      <td>$181.56</td>
-      <td>$339.71</td>
-      <td>$4.35</td>
-      <td>$8.14</td>
-      <td>+87.1%</td>
-      <td>+11.7%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>ASML Holding NV</td>
-      <td>ASML</td>
-      <td>0.10</td>
-      <td>$741.19</td>
-      <td>$1,395.88</td>
-      <td>$74.23</td>
-      <td>$139.80</td>
-      <td>+88.3%</td>
-      <td>+31.7%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Intel</td>
-      <td>INTC</td>
-      <td>0.20</td>
-      <td>$25.18</td>
-      <td>$49.25</td>
-      <td>$5.04</td>
-      <td>$9.85</td>
-      <td>+95.6%</td>
-      <td>+31.5%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Taiwan Semiconductor Manufacturing</td>
-      <td>TSM</td>
-      <td>0.03</td>
-      <td>$134.64</td>
-      <td>$335.75</td>
-      <td>$4.66</td>
-      <td>$11.61</td>
-      <td>+149.4%</td>
-      <td>+15.3%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Hershey</td>
-      <td>HSY</td>
-      <td>0.05</td>
-      <td></td>
-      <td>$201.47</td>
-      <td></td>
-      <td>$9.44</td>
-      <td></td>
-      <td>+5.7%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>General Electric</td>
-      <td>GE</td>
-      <td>0.05</td>
-      <td></td>
-      <td>$309.93</td>
-      <td></td>
-      <td>$15.22</td>
-      <td></td>
-      <td>+0.5%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Vanguard Value ETF</td>
-      <td>VTV</td>
-      <td>0.33</td>
-      <td></td>
-      <td>$202.47</td>
-      <td></td>
-      <td>$66.65</td>
-      <td></td>
-      <td>+5.5%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>ICICI Bank</td>
-      <td>IBN</td>
-      <td>5.91</td>
-      <td></td>
-      <td>$30.46</td>
-      <td></td>
-      <td>$179.96</td>
-      <td></td>
-      <td>+1.5%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>CVS</td>
-      <td>CVS</td>
-      <td>0.29</td>
-      <td></td>
-      <td>$76.83</td>
-      <td></td>
-      <td>$22.17</td>
-      <td></td>
-      <td>-1.4%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Warner Bros. Discovery</td>
-      <td>WBD</td>
-      <td>0.00</td>
-      <td></td>
-      <td>$27.19</td>
-      <td></td>
-      <td>$0.01</td>
-      <td></td>
-      <td>-3.6%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>United Airlines</td>
-      <td>UAL</td>
-      <td>0.18</td>
-      <td></td>
-      <td>$110.86</td>
-      <td></td>
-      <td>$19.74</td>
-      <td></td>
-      <td>-2.3%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>JPMorgan Chase</td>
-      <td>JPM</td>
-      <td>0.06</td>
-      <td></td>
-      <td>$314.85</td>
-      <td></td>
-      <td>$19.67</td>
-      <td></td>
-      <td>-0.8%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Oracle</td>
-      <td>ORCL</td>
-      <td>0.04</td>
-      <td></td>
-      <td>$154.67</td>
-      <td></td>
-      <td>$5.70</td>
-      <td></td>
-      <td>-20.3%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Volkswagen</td>
-      <td>VWAGY</td>
-      <td>9.00</td>
-      <td></td>
-      <td>$11.98</td>
-      <td></td>
-      <td>$107.82</td>
-      <td></td>
-      <td>-2.3%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Mastercard</td>
-      <td>MA</td>
-      <td>0.11</td>
-      <td></td>
-      <td>$550.72</td>
-      <td></td>
-      <td>$62.85</td>
-      <td></td>
-      <td>-3.4%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Zoom</td>
-      <td>ZM</td>
-      <td>0.84</td>
-      <td></td>
-      <td>$88.73</td>
-      <td></td>
-      <td>$74.71</td>
-      <td></td>
-      <td>-1.4%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Spotify</td>
-      <td>SPOT</td>
-      <td>0.00</td>
-      <td></td>
-      <td>$473.99</td>
-      <td></td>
-      <td>$1.42</td>
-      <td></td>
-      <td>-18.7%</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Rivian Automotive</td>
-      <td>RIVN</td>
-      <td>0.51</td>
-      <td></td>
-      <td>$14.41</td>
-      <td></td>
-      <td>$7.39</td>
-      <td></td>
-      <td>-35.3%</td>
-      <td></td>
-      <td></td>
-    </tr>
-  </tbody>
-</table>
-  <footer>Data source: holdings workbook (sheet export) · Robinhood Jan statement loaded separately for reconciliation · Intraday quotes via Yahoo Finance.</footer>
+  <section id="controls">
+    <input id="search" type="search" placeholder="Filter by ticker, name, or notes..." />
+    <button class="sort-btn" data-field="pctVsBuy">Sort Δ vs Buy</button>
+    <button class="sort-btn" data-field="pctVsDec">Sort Δ vs Dec</button>
+    <button class="sort-btn" data-field="dayPct">Sort Today %</button>
+  </section>
+  <table>
+    <thead>
+      <tr>
+        <th>Ticker</th>
+        <th>Name</th>
+        <th>Units</th>
+        <th>Buy</th>
+        <th>Now</th>
+        <th>Δ vs Buy</th>
+        <th>Δ vs Dec19</th>
+        <th>Today</th>
+        <th>Today %</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody id="positions-body"></tbody>
+  </table>
+  <div id="alert"></div>
+  <div id="detail-modal">
+    <div id="detail-card">
+      <header>
+        <div>
+          <div id="detail-title" style="font-size: 18px; font-weight: 600;"></div>
+          <div id="detail-meta" style="font-size: 13px; color: #94a3b8;"></div>
+        </div>
+        <button id="detail-close">&times;</button>
+      </header>
+      <div id="detail-body"></div>
+    </div>
+  </div>
+  <footer>Data source: holdings workbook (sheet export) · Robinhood Jan statement · Intraday quotes via Yahoo Finance API. Dashboard refreshes quotes automatically every 60 seconds.</footer>
+  <script id="portfolio-data" type="application/json">[{"name": "GoodRx", "symbol": "GDRX", "units": 100.0, "buy": 4.34, "current": 2.16, "costBasis": 434.0, "currentValue": 216.0, "pctVsBuy": -50.23041474654377, "pctVsDec": -21.167883211678834, "dayChange": null, "dayPct": null}, {"name": "Fiserv", "symbol": "FISV", "units": 20.0, "buy": 101.93, "current": 58.12, "costBasis": 2038.6000000000001, "currentValue": 1162.3999999999999, "pctVsBuy": -42.98047679780242, "pctVsDec": -14.176018901358537, "dayChange": null, "dayPct": null}, {"name": "Sweetgreen", "symbol": "SG", "units": 38.0, "buy": 9.83, "current": 6.09, "costBasis": 373.54, "currentValue": 231.42, "pctVsBuy": -38.04679552390641, "pctVsDec": -11.866859623733724, "dayChange": null, "dayPct": null}, {"name": "Adobe", "symbol": "ADBE", "units": 0.5, "buy": 355.06, "current": 271.93, "costBasis": 177.53, "currentValue": 135.965, "pctVsBuy": -23.412944291105728, "pctVsDec": -23.57652745770333, "dayChange": null, "dayPct": null}, {"name": "Salesforce", "symbol": "CRM", "units": 31.0582, "buy": 241.07, "current": 196.38, "costBasis": 7487.210398939999, "currentValue": 6099.21756396, "pctVsBuy": -18.538183929978842, "pctVsDec": -24.20101899027327, "dayChange": null, "dayPct": null}, {"name": "CAVA", "symbol": "CAVA", "units": 18.4826, "buy": 74.73, "current": 60.89, "costBasis": 1381.2061926000001, "currentValue": 1125.4067318, "pctVsBuy": -18.520005352602706, "pctVsDec": 7.049929676511951, "dayChange": null, "dayPct": null}, {"name": "Progressive", "symbol": "PGR", "units": 11.0046, "buy": 246.72, "current": 201.03, "costBasis": 2715.0561456, "currentValue": 2212.25574315, "pctVsBuy": -18.51896887159533, "pctVsDec": -10.613606047132059, "dayChange": null, "dayPct": null}, {"name": "Lululemon", "symbol": "LULU", "units": 47.164, "buy": 207.69, "current": 171.57, "costBasis": 9795.4953138, "currentValue": 8091.9309114, "pctVsBuy": -17.39130434782609, "pctVsDec": -17.49459004568406, "dayChange": null, "dayPct": null}, {"name": "Microsoft", "symbol": "MSFT", "units": 5.1, "buy": 490.54, "current": 411.21, "costBasis": 2501.754, "currentValue": 2097.171, "pctVsBuy": -16.171973743221763, "pctVsDec": -14.947877885331357, "dayChange": null, "dayPct": null}, {"name": "Cloudflare", "symbol": "NET", "units": 2.0, "buy": 195.73, "current": 170.31, "costBasis": 391.46, "currentValue": 340.62, "pctVsBuy": -12.987278393705608, "pctVsDec": -13.46915963824814, "dayChange": null, "dayPct": null}, {"name": "Diageo", "symbol": "DEO", "units": 13.2949, "buy": 106.63, "current": 93.11, "costBasis": 1417.6341207, "currentValue": 1237.8872079, "pctVsBuy": -12.679358529494511, "pctVsDec": 3.8247100802854512, "dayChange": null, "dayPct": null}, {"name": "Uber", "symbol": "UBER", "units": 8.0282, "buy": 87.79, "current": 77.93, "costBasis": 704.7945367300001, "currentValue": 625.6366129100002, "pctVsBuy": -11.231347533887686, "pctVsDec": -1.2794527489232215, "dayChange": null, "dayPct": null}, {"name": "UnitedHealth", "symbol": "UNH", "units": 22.1259, "buy": 310.83, "current": 284.18, "costBasis": 6877.401578579999, "currentValue": 6287.74565068, "pctVsBuy": -8.57381848598912, "pctVsDec": -13.683443185614921, "dayChange": null, "dayPct": null}, {"name": "Novo Nordisk", "symbol": "NVO", "units": 50.3944, "buy": 53.03, "current": 50.3, "costBasis": 2672.41360019, "currentValue": 2534.8369619, "pctVsBuy": -5.148029417310964, "pctVsDec": 3.8398018166804286, "dayChange": null, "dayPct": null}, {"name": "S&P Global", "symbol": "SPGI", "units": 4.0, "buy": 493.29, "current": 468.21, "costBasis": 1973.16, "currentValue": 1872.84, "pctVsBuy": -5.084230371586702, "pctVsDec": -8.552734375000004, "dayChange": null, "dayPct": null}, {"name": "Mondelez", "symbol": "MDLZ", "units": 0.0882, "buy": 62.08, "current": 59.47, "costBasis": 5.4769459199999995, "currentValue": 5.24668128, "pctVsBuy": -4.204252577319586, "pctVsDec": 7.872301832033369, "dayChange": null, "dayPct": null}, {"name": "Visa", "symbol": "V", "units": 0.2077, "buy": 342.0, "current": 328.93, "costBasis": 71.02827, "currentValue": 68.31382705, "pctVsBuy": -3.821637426900583, "pctVsDec": -5.493463582818562, "dayChange": null, "dayPct": null}, {"name": "Block", "symbol": "XYZ", "units": 10.05, "buy": 58.77, "current": 56.79, "costBasis": 590.6355615000001, "currentValue": 570.7366605000001, "pctVsBuy": -3.369065849923437, "pctVsDec": -13.138574487610885, "dayChange": null, "dayPct": null}, {"name": "Procter & Gamble", "symbol": "PG", "units": 20.2333, "buy": 157.73, "current": 155.32, "costBasis": 3191.39698943, "currentValue": 3142.6347581200002, "pctVsBuy": -1.527927470994736, "pctVsDec": 7.607038935845913, "dayChange": null, "dayPct": null}, {"name": "Palo Alto Networks", "symbol": "PANW", "units": 0.1661, "buy": 168.04, "current": 166.24, "costBasis": 27.919845999999996, "currentValue": 27.620776, "pctVsBuy": -1.071173530111868, "pctVsDec": -11.291355389541087, "dayChange": null, "dayPct": null}, {"name": "Airbnb", "symbol": "ABNB", "units": 1.0, "buy": 123.26, "current": 122.08, "costBasis": 123.26, "currentValue": 122.08, "pctVsBuy": -0.9573259776083131, "pctVsDec": -9.910707696848936, "dayChange": null, "dayPct": null}, {"name": "Snowflake", "symbol": "SNOW", "units": 0.1702, "buy": 172.85, "current": 173.24, "costBasis": 29.4180329, "currentValue": 29.484408560000002, "pctVsBuy": 0.2256291582296875, "pctVsDec": -22.56738032449827, "dayChange": null, "dayPct": null}, {"name": "e.l.f. Beauty", "symbol": "ELF", "units": 7.05, "buy": 83.49, "current": 84.81, "costBasis": 588.6044999999999, "currentValue": 597.9105, "pctVsBuy": 1.5810276679841986, "pctVsDec": 5.432620586772756, "dayChange": null, "dayPct": null}, {"name": "Pfizer", "symbol": "PFE", "units": 0.2127, "buy": 25.35, "current": 25.77, "costBasis": 5.392274550000001, "currentValue": 5.48161401, "pctVsBuy": 1.6568047337278033, "pctVsDec": 1.7772511848341204, "dayChange": null, "dayPct": null}, {"name": "CrowdStrike Holdings", "symbol": "CRWD", "units": 0.1154, "buy": 408.17, "current": 421.73, "costBasis": 47.0946546, "currentValue": 48.6592074, "pctVsBuy": 3.3221451846044547, "pctVsDec": -13.167105913358586, "dayChange": null, "dayPct": null}, {"name": "Chipotle", "symbol": "CMG", "units": 58.0, "buy": 37.5, "current": 39.17, "costBasis": 2175.0, "currentValue": 2271.86, "pctVsBuy": 4.453333333333338, "pctVsDec": 3.6791953414505043, "dayChange": null, "dayPct": null}, {"name": "McDonald's", "symbol": "MCD", "units": 8.6303, "buy": 304.77, "current": 319.48, "costBasis": 2630.2696361099997, "currentValue": 2757.22198164, "pctVsBuy": 4.826590543688695, "pctVsDec": 0.7759762790991219, "dayChange": null, "dayPct": null}, {"name": "Deckers Outdoor", "symbol": "DECK", "units": 7.0, "buy": 106.87, "current": 113.34, "costBasis": 748.09, "currentValue": 793.38, "pctVsBuy": 6.054084401609431, "pctVsDec": 14.704989373545189, "dayChange": null, "dayPct": null}, {"name": "Costco", "symbol": "COST", "units": 3.1304, "buy": 921.15, "current": 977.92, "costBasis": 2883.5707234499996, "currentValue": 3061.2837017599995, "pctVsBuy": 6.162948488302663, "pctVsDec": 14.574936732589745, "dayChange": null, "dayPct": null}, {"name": "GE HealthCare", "symbol": "GEHC", "units": 12.0058, "buy": 73.72, "current": 78.78, "costBasis": 885.06705996, "currentValue": 945.8163725400001, "pctVsBuy": 6.86380900705372, "pctVsDec": -5.516910530103136, "dayChange": null, "dayPct": null}, {"name": "Alibaba", "symbol": "BABA", "units": 5.1, "buy": 151.22, "current": 163.65, "costBasis": 771.222, "currentValue": 834.615, "pctVsBuy": 8.219812194154217, "pctVsDec": 8.442117818567365, "dayChange": null, "dayPct": null}, {"name": "Boeing", "symbol": "BA", "units": 25.0, "buy": 213.81, "current": 233.15, "costBasis": 5345.25, "currentValue": 5828.75, "pctVsBuy": 9.045414152752446, "pctVsDec": 8.411606063424163, "dayChange": null, "dayPct": null}, {"name": "Amazon", "symbol": "AMZN", "units": 15.0221, "buy": 216.63, "current": 238.62, "costBasis": 3254.23340703, "currentValue": 3584.56896822, "pctVsBuy": 10.15094862207451, "pctVsDec": 4.460885172700607, "dayChange": null, "dayPct": null}, {"name": "Meta Platforms", "symbol": "META", "units": 22.0169, "buy": 627.16, "current": 691.7, "costBasis": 13808.147226199999, "currentValue": 15229.120856500002, "pctVsBuy": 10.290834874673143, "pctVsDec": 3.9696974251830155, "dayChange": null, "dayPct": null}, {"name": "Starbucks", "symbol": "SBUX", "units": 10.3864, "buy": 82.92, "current": 93.04, "costBasis": 861.2394588000001, "currentValue": 966.3497256, "pctVsBuy": 12.20453449107574, "pctVsDec": 4.857432660881328, "dayChange": null, "dayPct": null}, {"name": "Nike", "symbol": "NKE", "units": 1.2662, "buy": 53.58, "current": 60.93, "costBasis": 67.84246019999999, "currentValue": 77.1489567, "pctVsBuy": 13.717805151175815, "pctVsDec": 4.35005994177085, "dayChange": null, "dayPct": null}, {"name": "Home Depot", "symbol": "HD", "units": 2.3121, "buy": 334.58, "current": 381.1, "costBasis": 773.5844254799999, "currentValue": 881.1435966, "pctVsBuy": 13.903999043577034, "pctVsDec": 9.89993367361653, "dayChange": null, "dayPct": null}, {"name": "Coca-Cola", "symbol": "KO", "units": 38.4952, "buy": 66.5, "current": 76.89, "costBasis": 2559.9337925, "currentValue": 2959.8993880499997, "pctVsBuy": 15.62406015037594, "pctVsDec": 9.11025968497233, "dayChange": null, "dayPct": null}, {"name": "Qualcomm", "symbol": "QCOM", "units": 0.0159, "buy": 124.83, "current": 147.18, "costBasis": 1.9879177500000003, "currentValue": 2.3438415000000004, "pctVsBuy": 17.90434991588561, "pctVsDec": -16.155861911814963, "dayChange": null, "dayPct": null}, {"name": "Target", "symbol": "TGT", "units": 42.2435, "buy": 92.3, "current": 111.3, "costBasis": 3899.0726501999998, "currentValue": 4701.6986562, "pctVsBuy": 20.58504875406284, "pctVsDec": 14.517954522070173, "dayChange": null, "dayPct": null}, {"name": "PepsiCo", "symbol": "PEP", "units": 0.0001, "buy": 132.33, "current": 162.85, "costBasis": 0.017599890000000003, "currentValue": 0.02165905, "pctVsBuy": 23.063553238116814, "pctVsDec": 9.611630881066164, "dayChange": null, "dayPct": null}, {"name": "IBM", "symbol": "IBM", "units": 0.1, "buy": 238.29, "current": 294.31, "costBasis": 23.829, "currentValue": 29.431, "pctVsBuy": 23.509169499349536, "pctVsDec": -2.5011594779036677, "dayChange": null, "dayPct": null}, {"name": "Disney", "symbol": "DIS", "units": 0.8277, "buy": 81.24, "current": 104.22, "costBasis": 67.24259172, "currentValue": 86.26320666, "pctVsBuy": 28.286558345642547, "pctVsDec": -6.453639709182298, "dayChange": null, "dayPct": null}, {"name": "UPS", "symbol": "UPS", "units": 12.1373, "buy": 87.16, "current": 111.85, "costBasis": 1057.88767812, "currentValue": 1357.55778795, "pctVsBuy": 28.32721431849472, "pctVsDec": 9.872298624754418, "dayChange": null, "dayPct": null}, {"name": "Blackrock, Inc.", "symbol": "BLK", "units": 0.0624, "buy": 799.15, "current": 1070.08, "costBasis": 49.8301991, "currentValue": 66.72376831999999, "pctVsBuy": 33.9022711631108, "pctVsDec": 0.9052504526252176, "dayChange": null, "dayPct": null}, {"name": "Toyota", "symbol": "TM", "units": 0.0438, "buy": 172.32, "current": 231.42, "costBasis": 7.549683839999999, "currentValue": 10.138973039999998, "pctVsBuy": 34.296657381615596, "pctVsDec": 5.009528995371627, "dayChange": null, "dayPct": null}, {"name": "American Airlines", "symbol": "AAL", "units": 3.7884, "buy": 10.42, "current": 14.01, "costBasis": 39.4755448, "currentValue": 53.0760444, "pctVsBuy": 34.452975047984644, "pctVsDec": -11.27295756808106, "dayChange": null, "dayPct": null}, {"name": "Exxon Mobil", "symbol": "XOM", "units": 2.0, "buy": 105.84, "current": 143.73, "costBasis": 211.68, "currentValue": 287.46, "pctVsBuy": 35.799319727891145, "pctVsDec": 23.50060147791716, "dayChange": null, "dayPct": null}, {"name": "Tesla", "symbol": "TSLA", "units": 0.1, "buy": 305.97, "current": 421.96, "costBasis": 30.597000000000005, "currentValue": 42.196, "pctVsBuy": 37.90894532143672, "pctVsDec": -12.554399635263405, "dayChange": null, "dayPct": null}, {"name": "Lockheed", "symbol": "LMT", "units": 15.0741, "buy": 452.98, "current": 628.26, "costBasis": 6828.2476988, "currentValue": 9470.428935599999, "pctVsBuy": 38.694865115457624, "pctVsDec": 32.28475775377424, "dayChange": null, "dayPct": null}, {"name": "Apple", "symbol": "AAPL", "units": 0.0317, "buy": 191.79, "current": 269.48, "costBasis": 6.075331829999999, "currentValue": 8.53631796, "pctVsBuy": 40.507847124459055, "pctVsDec": -0.3365509079477674, "dayChange": null, "dayPct": null}, {"name": "Eli Lilly", "symbol": "LLY", "units": 0.0139, "buy": 688.65, "current": 1003.46, "costBasis": 9.5873853, "currentValue": 13.97017012, "pctVsBuy": 45.71407826907719, "pctVsDec": -6.440785425252199, "dayChange": null, "dayPct": null}, {"name": "Lyft", "symbol": "LYFT", "units": 0.0152, "buy": 11.33, "current": 16.76, "costBasis": 0.17206871, "currentValue": 0.25453412000000003, "pctVsBuy": 47.925860547219784, "pctVsDec": -13.918849512069839, "dayChange": null, "dayPct": null}, {"name": "Delta Air Lines", "symbol": "DAL", "units": 10.1707, "buy": 47.32, "current": 70.44, "costBasis": 481.27880164, "currentValue": 716.4260098799999, "pctVsBuy": 48.85883347421808, "pctVsDec": -0.620767494356656, "dayChange": null, "dayPct": null}, {"name": "American Express", "symbol": "AXP", "units": 0.0393, "buy": 234.69, "current": 349.63, "costBasis": 9.23411274, "currentValue": 13.75654198, "pctVsBuy": 48.9752439388129, "pctVsDec": -7.223033037017387, "dayChange": null, "dayPct": null}, {"name": "Shopify", "symbol": "SHOP", "units": 0.0061, "buy": 79.6, "current": 119.29, "costBasis": 0.4871519999999999, "currentValue": 0.7300548, "pctVsBuy": 49.86180904522615, "pctVsDec": -30.28868630201028, "dayChange": null, "dayPct": null}, {"name": "Merck", "symbol": "MRK", "units": 0.0101, "buy": 77.03, "current": 115.84, "costBasis": 0.7791584500000001, "currentValue": 1.1717216000000001, "pctVsBuy": 50.38296767493185, "pctVsDec": 14.116835779726134, "dayChange": null, "dayPct": null}, {"name": "Celsius", "symbol": "CELH", "units": 0.1, "buy": 33.26, "current": 50.36, "costBasis": 3.326, "currentValue": 5.0360000000000005, "pctVsBuy": 51.413108839446785, "pctVsDec": 18.5778196373911, "dayChange": null, "dayPct": null}, {"name": "Hasbro", "symbol": "HAS", "units": 1.0625, "buy": 61.74, "current": 94.66, "costBasis": 65.59899696, "currentValue": 100.57662863999998, "pctVsBuy": 53.32037576935535, "pctVsDec": 15.172162063511374, "dayChange": null, "dayPct": null}, {"name": "Johnson & Johnson", "symbol": "JNJ", "units": 0.0168, "buy": 149.31, "current": 233.1, "costBasis": 2.50288353, "currentValue": 3.9074553, "pctVsBuy": 56.1181434599156, "pctVsDec": 11.954276931943705, "dayChange": null, "dayPct": null}, {"name": "Bank of America", "symbol": "BAC", "units": 0.0812, "buy": 34.39, "current": 54.45, "costBasis": 2.79408433, "currentValue": 4.4238991500000004, "pctVsBuy": 58.33091014829893, "pctVsDec": -1.3408226127921632, "dayChange": null, "dayPct": null}, {"name": "AMD", "symbol": "AMD", "units": 0.006, "buy": 152.83, "current": 242.11, "costBasis": 0.9200366000000001, "currentValue": 1.4575022000000002, "pctVsBuy": 58.41784989858012, "pctVsDec": 12.68792180591111, "dayChange": null, "dayPct": null}, {"name": "GM", "symbol": "GM", "units": 1.0025, "buy": 52.38, "current": 85.71, "costBasis": 52.5125214, "currentValue": 85.9268463, "pctVsBuy": 63.63115693012599, "pctVsDec": 4.232032105071129, "dayChange": null, "dayPct": null}, {"name": "Citigroup", "symbol": "C", "units": 0.0755, "buy": 70.57, "current": 117.71, "costBasis": 5.32761158, "currentValue": 8.88639874, "pctVsBuy": 66.79892305512259, "pctVsDec": 2.072493929934097, "dayChange": null, "dayPct": null}, {"name": "Alphabet Class A", "symbol": "GOOGL", "units": 0.024, "buy": 181.56, "current": 339.71, "costBasis": 4.35163008, "currentValue": 8.14216928, "pctVsBuy": 87.1061907909231, "pctVsDec": 11.724659606656573, "dayChange": null, "dayPct": null}, {"name": "ASML Holding NV", "symbol": "ASML", "units": 0.1002, "buy": 741.19, "current": 1395.88, "costBasis": 74.23388445, "currentValue": 139.8043614, "pctVsBuy": 88.32957811087574, "pctVsDec": 31.686792452830197, "dayChange": null, "dayPct": null}, {"name": "Intel", "symbol": "INTC", "units": 0.2, "buy": 25.18, "current": 49.25, "costBasis": 5.0360000000000005, "currentValue": 9.850000000000001, "pctVsBuy": 95.59173947577443, "pctVsDec": 31.543803418803428, "dayChange": null, "dayPct": null}, {"name": "Taiwan Semiconductor Manufacturing", "symbol": "TSM", "units": 0.0346, "buy": 134.64, "current": 335.75, "costBasis": 4.657466879999999, "currentValue": 11.614263999999999, "pctVsBuy": 149.3686868686869, "pctVsDec": 15.33044792525419, "dayChange": null, "dayPct": null}, {"name": "Hershey", "symbol": "HSY", "units": 0.0468, "buy": NaN, "current": 201.47, "costBasis": NaN, "currentValue": 9.43745921, "pctVsBuy": NaN, "pctVsDec": 5.74742809153894, "dayChange": null, "dayPct": null}, {"name": "General Electric", "symbol": "GE", "units": 0.0491, "buy": NaN, "current": 309.93, "costBasis": NaN, "currentValue": 15.22190202, "pctVsBuy": NaN, "pctVsDec": 0.5058857865551131, "dayChange": null, "dayPct": null}, {"name": "Vanguard Value ETF", "symbol": "VTV", "units": 0.3292, "buy": NaN, "current": 202.47, "costBasis": NaN, "currentValue": 66.65352894, "pctVsBuy": NaN, "pctVsDec": 5.502579334062843, "dayChange": null, "dayPct": null}, {"name": "ICICI Bank", "symbol": "IBN", "units": 5.908, "buy": NaN, "current": 30.46, "costBasis": NaN, "currentValue": 179.9590507, "pctVsBuy": NaN, "pctVsDec": 1.533333333333336, "dayChange": null, "dayPct": null}, {"name": "CVS", "symbol": "CVS", "units": 0.2886, "buy": NaN, "current": 76.83, "costBasis": NaN, "currentValue": 22.17044895, "pctVsBuy": NaN, "pctVsDec": -1.4115231618118933, "dayChange": null, "dayPct": null}, {"name": "Warner Bros. Discovery", "symbol": "WBD", "units": 0.0002, "buy": NaN, "current": 27.19, "costBasis": NaN, "currentValue": 0.00532924, "pctVsBuy": NaN, "pctVsDec": -3.6157390996100656, "dayChange": null, "dayPct": null}, {"name": "United Airlines", "symbol": "UAL", "units": 0.178, "buy": NaN, "current": 110.86, "costBasis": NaN, "currentValue": 19.73629494, "pctVsBuy": NaN, "pctVsDec": -2.2743300423131156, "dayChange": null, "dayPct": null}, {"name": "JPMorgan Chase", "symbol": "JPM", "units": 0.0625, "buy": NaN, "current": 314.85, "costBasis": NaN, "currentValue": 19.67088345, "pctVsBuy": NaN, "pctVsDec": -0.7658850226928738, "dayChange": null, "dayPct": null}, {"name": "Oracle", "symbol": "ORCL", "units": 0.0369, "buy": NaN, "current": 154.67, "costBasis": NaN, "currentValue": 5.700362849999999, "pctVsBuy": NaN, "pctVsDec": -20.297846027001963, "dayChange": null, "dayPct": null}, {"name": "Volkswagen", "symbol": "VWAGY", "units": 9.0, "buy": NaN, "current": 11.98, "costBasis": NaN, "currentValue": 107.82000000000001, "pctVsBuy": NaN, "pctVsDec": -2.2838499184339263, "dayChange": null, "dayPct": null}, {"name": "Mastercard", "symbol": "MA", "units": 0.1141, "buy": NaN, "current": 550.72, "costBasis": NaN, "currentValue": 62.8536736, "pctVsBuy": NaN, "pctVsDec": -3.350239553535375, "dayChange": null, "dayPct": null}, {"name": "Zoom", "symbol": "ZM", "units": 0.842, "buy": NaN, "current": 88.73, "costBasis": NaN, "currentValue": 74.71367682, "pctVsBuy": NaN, "pctVsDec": -1.4220642150872136, "dayChange": null, "dayPct": null}, {"name": "Spotify", "symbol": "SPOT", "units": 0.003, "buy": NaN, "current": 473.99, "costBasis": NaN, "currentValue": 1.42007404, "pctVsBuy": NaN, "pctVsDec": -18.699507727140183, "dayChange": null, "dayPct": null}, {"name": "Rivian Automotive", "symbol": "RIVN", "units": 0.5126, "buy": NaN, "current": 14.41, "costBasis": NaN, "currentValue": 7.387070349999999, "pctVsBuy": NaN, "pctVsDec": -35.29411764705882, "dayChange": null, "dayPct": null}]</script>
+  <script>
+  const tableBody = document.getElementById('positions-body');
+  const data = JSON.parse(document.getElementById('portfolio-data').textContent);
+  let filtered = [...data];
+  let currentSort = null;
+
+  const fmtMoney = (v) => v == null ? '—' : '$' + v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtPct = (v) => v == null ? '—' : (v > 0 ? '+' : '') + v.toFixed(1) + '%';
+
+  function renderTable() {
+    tableBody.innerHTML = '';
+    filtered.forEach(row => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${row.symbol}</td>
+        <td>${row.name}</td>
+        <td>${row.units.toFixed(2)}</td>
+        <td>${fmtMoney(row.buy)}</td>
+        <td>${fmtMoney(row.current)}</td>
+        <td class="${row.pctVsBuy >= 0 ? 'badge-profit' : 'badge-loss'}">${fmtPct(row.pctVsBuy)}</td>
+        <td class="${row.pctVsDec >= 0 ? 'badge-profit' : 'badge-loss'}">${fmtPct(row.pctVsDec)}</td>
+        <td>${fmtMoney(row.dayChange)}</td>
+        <td class="${row.dayPct >= 0 ? 'badge-profit' : 'badge-loss'}">${fmtPct(row.dayPct)}</td>
+        <td>${fmtMoney(row.currentValue)}</td>`;
+      tr.addEventListener('click', () => openDetail(row));
+      tableBody.appendChild(tr);
+    });
+  }
+
+  function applyFilter(term) {
+    const needle = term.toLowerCase();
+    filtered = data.filter(row => row.symbol.toLowerCase().includes(needle) || row.name.toLowerCase().includes(needle));
+    applySort(currentSort?.field, true);
+  }
+
+  function applySort(field, skipToggle) {
+    if (!field) { renderTable(); return; }
+    if (!skipToggle) {
+      if (currentSort?.field === field) {
+        currentSort.dir = currentSort.dir === 'desc' ? 'asc' : 'desc';
+      } else {
+        currentSort = { field, dir: 'desc' };
+      }
+    } else if (!currentSort) {
+      currentSort = { field, dir: 'desc' };
+    }
+    const dir = currentSort.dir === 'desc' ? -1 : 1;
+    filtered.sort((a, b) => {
+      const av = a[field] ?? -Infinity;
+      const bv = b[field] ?? -Infinity;
+      return av > bv ? dir : av < bv ? -dir : 0;
+    });
+    renderTable();
+    document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.field === field));
+  }
+
+  function openDetail(row) {
+    document.getElementById('detail-title').textContent = `${row.symbol} · ${row.name}`;
+    document.getElementById('detail-meta').textContent = `${row.units.toFixed(2)} units · ${fmtMoney(row.currentValue)} current value`;
+    const tvSymbol = encodeURIComponent(row.symbol);
+    document.getElementById('detail-body').innerHTML = `
+      <div style="margin-bottom:12px;font-size:13px;color:#94a3b8;">
+        Δ vs buy <span class="${row.pctVsBuy >=0 ? 'badge-profit' : 'badge-loss'}">${fmtPct(row.pctVsBuy)}</span> ·
+        Today <span class="${row.dayPct >=0 ? 'badge-profit' : 'badge-loss'}">${fmtMoney(row.dayChange)} (${fmtPct(row.dayPct)})</span>
+      </div>
+      <iframe style="width:100%;height:420px;border:0;border-radius:12px;background:#0b111f;"
+        src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_${tvSymbol}&symbol=${tvSymbol}&interval=60&hidetoptoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=dark"
+        loading="lazy"></iframe>`;
+    document.getElementById('detail-modal').style.display = 'flex';
+  }
+
+  document.getElementById('detail-close').addEventListener('click', () => {
+    document.getElementById('detail-modal').style.display = 'none';
+  });
+  document.getElementById('detail-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'detail-modal') {
+      e.currentTarget.style.display = 'none';
+    }
+  });
+
+  document.getElementById('search').addEventListener('input', (e) => applyFilter(e.target.value));
+  document.querySelectorAll('.sort-btn').forEach(btn => {
+    btn.addEventListener('click', () => applySort(btn.dataset.field));
+  });
+
+  function chunk(array, size) {
+    const chunks = [];
+    for (let i = 0; i < array.length; i += size) chunks.push(array.slice(i, i + size));
+    return chunks;
+  }
+
+  async function refreshLiveQuotes() {
+    const alertBar = document.getElementById('alert');
+    try {
+      const symbols = data.map(d => d.symbol).filter(Boolean);
+      const groups = chunk(symbols, 20);
+      for (const group of groups) {
+        const query = group.join(',');
+        const resp = await fetch(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${query}`);
+        if (!resp.ok) continue;
+        const payload = await resp.json();
+        payload.quoteResponse.result.forEach(item => {
+          const sym = item.symbol?.toUpperCase();
+          const record = data.find(d => d.symbol === sym);
+          if (!record) return;
+          const price = item.regularMarketPrice;
+          if (price != null) {
+            record.current = price;
+            record.currentValue = price * record.units;
+          }
+          if (item.previousClose) {
+            record.dayChange = price - item.previousClose;
+            record.dayPct = ((record.dayChange) / item.previousClose) * 100;
+          }
+          if (record.buy) {
+            record.pctVsBuy = ((record.current - record.buy) / record.buy) * 100;
+          }
+        });
+      }
+      applySort(currentSort?.field || 'pctVsBuy', true);
+      alertBar.textContent = `Quotes refreshed ${new Date().toLocaleTimeString()}`;
+    } catch (err) {
+      alertBar.textContent = 'Live quote refresh failed; using last known values.';
+    }
+  }
+
+  renderTable();
+  applySort('pctVsBuy', true);
+  refreshLiveQuotes();
+  setInterval(refreshLiveQuotes, 60000);
+  </script>
 </body>
 </html>

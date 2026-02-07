@@ -1,7 +1,11 @@
-import pandas as pd
-from pathlib import Path
-from datetime import datetime
+import json
+import math
 import time
+from datetime import datetime
+from pathlib import Path
+from textwrap import dedent
+
+import pandas as pd
 import yfinance as yf
 
 SOURCE = Path(r"C:/Users/bgand/.openclaw/media/inbound/e5dc6078-2b7f-4d35-9ed3-8b4f2a89c10e.xlsx")
@@ -115,7 +119,7 @@ def build():
     total_gain = total_value - total_cost
     pct_gain = (total_gain / total_cost * 100) if total_cost else 0
 
-    display_cols = [
+    view_cols = [
         "Stock Name",
         "Symbol",
         "Symbol_clean",
@@ -129,79 +133,253 @@ def build():
         "DayChange",
         "DayPct",
     ]
+    view_df = holdings[view_cols].copy()
 
-    table_df = holdings[display_cols].copy()
-
-    summary_lines = []
-    for _, row in table_df.iterrows():
-        name = row["Stock Name"]
-        sym = row["Symbol_clean"] or row["Symbol"]
-        units = row["Units"] or 0
-        now_val = money_format(row["Current"])
-        delta_buy = pct_format(row["Pct_vs_buy"])
-        delta_dec = pct_format(row["Pct_vs_dec"])
-        day_move = money_format(row["DayChange"])
-        day_pct = pct_format(row["DayPct"])
-        summary_lines.append(
-            f"- {name} ({sym}) — {units:.2f} sh · Now {now_val or 'n/a'} · Δ vs buy {delta_buy or 'n/a'} · Δ vs Dec19 {delta_dec or 'n/a'} · Today {day_move or 'n/a'} ({day_pct or 'n/a'})"
+    interactive_records = []
+    for _, row in view_df.iterrows():
+        sym_clean = row["Symbol_clean"]
+        interactive_records.append(
+            {
+                "name": row["Stock Name"],
+                "symbol": sym_clean,
+                "units": round(float(row["Units"]), 4) if not math.isnan(row["Units"]) else 0,
+                "buy": row["Buy"],
+                "current": row["Current"],
+                "costBasis": row["CostBasis"],
+                "currentValue": row["CurrentValue"],
+                "pctVsBuy": row["Pct_vs_buy"],
+                "pctVsDec": row["Pct_vs_dec"],
+                "dayChange": row["DayChange"],
+                "dayPct": row["DayPct"],
+            }
         )
 
-    table_df = table_df.drop(columns=["Symbol_clean"])
-    table_df["Units"] = table_df["Units"].map(lambda x: f"{x:.2f}")
-    table_df["Buy"] = table_df["Buy"].map(money_format)
-    table_df["Current"] = table_df["Current"].map(money_format)
-    table_df["CostBasis"] = table_df["CostBasis"].map(money_format)
-    table_df["CurrentValue"] = table_df["CurrentValue"].map(money_format)
-    table_df["Pct_vs_buy"] = table_df["Pct_vs_buy"].map(pct_format)
-    table_df["Pct_vs_dec"] = table_df["Pct_vs_dec"].map(pct_format)
-    table_df["DayChange"] = table_df["DayChange"].map(lambda v: money_format(v) if v is not None else "")
-    table_df["DayPct"] = table_df["DayPct"].map(pct_format)
-    table_df = table_df.rename(
-        columns={
-            "Stock Name": "Name",
-            "Pct_vs_buy": "Δ vs Buy",
-            "Pct_vs_dec": "Δ vs Dec 19",
-            "DayChange": "Δ Today",
-            "DayPct": "Δ Today %",
-        }
-    )
+    summary_lines = []
+    for rec in interactive_records:
+        summary_lines.append(
+            f"- {rec['name']} ({rec['symbol']}) — {rec['units']:.2f} sh · Now {money_format(rec['current']) or 'n/a'} · "
+            f"Δ vs buy {pct_format(rec['pctVsBuy']) or 'n/a'} · Δ vs Dec19 {pct_format(rec['pctVsDec']) or 'n/a'} · "
+            f"Today {money_format(rec['dayChange']) or 'n/a'} ({pct_format(rec['dayPct']) or 'n/a'})"
+        )
 
-    table_html = table_df.to_html(index=False, border=0, escape=False, na_rep="", classes="data-table")
+    SUMMARY.write_text("\n".join(summary_lines), encoding="utf-8")
 
-    generated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S ET")
-
-    html = f"""<!doctype html>
+    html = dedent(
+        """<!doctype html>
 <html lang=\"en\">
 <head>
 <meta charset=\"utf-8\" />
-<title>Portfolio MVP</title>
+<title>Portfolio Control Room</title>
 <style>
-body {{ font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 32px; background: #0b111b; color: #f1f5f9; }}
-h1 {{ font-size: 28px; margin-bottom: 4px; }}
-.summary {{ margin-bottom: 24px; font-size: 15px; color: #cbd5f5; }}
+body {{ font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 24px; background: #050b16; color: #f8fafc; }}
+h1 {{ font-size: 28px; margin-bottom: 6px; }}
+.summary {{ margin-bottom: 16px; font-size: 15px; color: #cbd5f5; }}
 strong {{ color: #fef08a; }}
-.data-table {{ width: 100%; border-collapse: collapse; font-size: 14px; }}
-.data-table thead tr {{ background: #111b2f; text-align: left; }}
-.data-table th, .data-table td {{ padding: 8px 10px; border-bottom: 1px solid rgba(148, 163, 184, 0.2); }}
-.data-table tr:nth-child(even) {{ background: rgba(15, 23, 42, 0.65); }}
-.badge-loss {{ color: #f87171; }}
-.badge-gain {{ color: #34d399; }}
+#controls {{ display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }}
+#controls input {{ flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(148,163,184,.3); background: #0f172a; color: #f8fafc; }}
+button.sort-btn {{ padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(148,163,184,.3); background: #111b2f; color: #f8fafc; cursor: pointer; }}
+button.sort-btn.active {{ border-color: #38bdf8; color: #38bdf8; }}
+table {{ width: 100%; border-collapse: collapse; font-size: 13px; }}
+thead {{ background: #0f172a; }}
+th, td {{ padding: 8px 10px; border-bottom: 1px solid rgba(148, 163, 184, 0.2); text-align: left; }}
+tr:nth-child(even) {{ background: rgba(15, 23, 42, 0.65); }}
+tr:hover {{ background: rgba(59,130,246,.15); cursor: pointer; }}
+.badge-profit {{ color: #34d399; font-weight: 600; }}
+.badge-loss {{ color: #f87171; font-weight: 600; }}
+#detail-modal {{ position: fixed; inset: 0; background: rgba(5,11,22,.9); display: none; align-items: center; justify-content: center; padding: 32px; z-index: 1000; }}
+#detail-card {{ width: min(900px, 90vw); background: #0b111f; border-radius: 16px; padding: 24px; border: 1px solid rgba(56,189,248,.2); }}
+#detail-card header {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }}
+#detail-card button {{ background: transparent; border: 0; color: #94a3b8; font-size: 24px; cursor: pointer; }}
+#alert {{ margin-top: 12px; font-size: 13px; color: #fbbf24; }}
 footer {{ margin-top: 24px; font-size: 12px; color: #94a3b8; }}
 </style>
 </head>
 <body>
-  <h1>Portfolio MVP</h1>
+  <h1>Portfolio Control Room</h1>
   <div class=\"summary\">
-    Snapshot generated {generated_at}. Holdings shown: <strong>{len(table_df)}</strong>.
-    Total cost basis: <strong>{money_format(total_cost)}</strong> · Current value: <strong>{money_format(total_value)}</strong>
-    · Net: <strong>{money_format(total_gain)} ({pct_gain:+.1f}%)</strong>
+    Snapshot generated {generated_at}. Holdings shown: <strong>{holding_count}</strong>. Cost basis <strong>{total_cost}</strong> · Market value <strong>{total_value}</strong> · Net <strong>{total_gain} ({pct_gain:+.1f}%)</strong>
   </div>
-  {table_html}
-  <footer>Data source: holdings workbook (sheet export) · Robinhood Jan statement loaded separately for reconciliation · Intraday quotes via Yahoo Finance.</footer>
+  <section id=\"controls\">
+    <input id=\"search\" type=\"search\" placeholder=\"Filter by ticker, name, or notes...\" />
+    <button class=\"sort-btn\" data-field=\"pctVsBuy\">Sort Δ vs Buy</button>
+    <button class=\"sort-btn\" data-field=\"pctVsDec\">Sort Δ vs Dec</button>
+    <button class=\"sort-btn\" data-field=\"dayPct\">Sort Today %</button>
+  </section>
+  <table>
+    <thead>
+      <tr>
+        <th>Ticker</th>
+        <th>Name</th>
+        <th>Units</th>
+        <th>Buy</th>
+        <th>Now</th>
+        <th>Δ vs Buy</th>
+        <th>Δ vs Dec19</th>
+        <th>Today</th>
+        <th>Today %</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody id=\"positions-body\"></tbody>
+  </table>
+  <div id=\"alert\"></div>
+  <div id=\"detail-modal\">
+    <div id=\"detail-card\">
+      <header>
+        <div>
+          <div id=\"detail-title\" style=\"font-size: 18px; font-weight: 600;\"></div>
+          <div id=\"detail-meta\" style=\"font-size: 13px; color: #94a3b8;\"></div>
+        </div>
+        <button id=\"detail-close\">&times;</button>
+      </header>
+      <div id=\"detail-body\"></div>
+    </div>
+  </div>
+  <footer>Data source: holdings workbook (sheet export) · Robinhood Jan statement · Intraday quotes via Yahoo Finance API. Dashboard refreshes quotes automatically every 60 seconds.</footer>
+  <script id=\"portfolio-data\" type=\"application/json\">{data_json}</script>
+  <script>
+  const tableBody = document.getElementById('positions-body');
+  const data = JSON.parse(document.getElementById('portfolio-data').textContent);
+  let filtered = [...data];
+  let currentSort = null;
+
+  const fmtMoney = (v) => v == null ? '—' : '$' + v.toLocaleString(undefined, {{ minimumFractionDigits: 2, maximumFractionDigits: 2 }});
+  const fmtPct = (v) => v == null ? '—' : (v > 0 ? '+' : '') + v.toFixed(1) + '%';
+
+  function renderTable() {{
+    tableBody.innerHTML = '';
+    filtered.forEach(row => {{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${{row.symbol}}</td>
+        <td>${{row.name}}</td>
+        <td>${{row.units.toFixed(2)}}</td>
+        <td>${{fmtMoney(row.buy)}}</td>
+        <td>${{fmtMoney(row.current)}}</td>
+        <td class="${{row.pctVsBuy >= 0 ? 'badge-profit' : 'badge-loss'}}">${{fmtPct(row.pctVsBuy)}}</td>
+        <td class="${{row.pctVsDec >= 0 ? 'badge-profit' : 'badge-loss'}}">${{fmtPct(row.pctVsDec)}}</td>
+        <td>${{fmtMoney(row.dayChange)}}</td>
+        <td class="${{row.dayPct >= 0 ? 'badge-profit' : 'badge-loss'}}">${{fmtPct(row.dayPct)}}</td>
+        <td>${{fmtMoney(row.currentValue)}}</td>`;
+      tr.addEventListener('click', () => openDetail(row));
+      tableBody.appendChild(tr);
+    }});
+  }}
+
+  function applyFilter(term) {{
+    const needle = term.toLowerCase();
+    filtered = data.filter(row => row.symbol.toLowerCase().includes(needle) || row.name.toLowerCase().includes(needle));
+    applySort(currentSort?.field, true);
+  }}
+
+  function applySort(field, skipToggle) {{
+    if (!field) {{ renderTable(); return; }}
+    if (!skipToggle) {{
+      if (currentSort?.field === field) {{
+        currentSort.dir = currentSort.dir === 'desc' ? 'asc' : 'desc';
+      }} else {{
+        currentSort = {{ field, dir: 'desc' }};
+      }}
+    }} else if (!currentSort) {{
+      currentSort = {{ field, dir: 'desc' }};
+    }}
+    const dir = currentSort.dir === 'desc' ? -1 : 1;
+    filtered.sort((a, b) => {{
+      const av = a[field] ?? -Infinity;
+      const bv = b[field] ?? -Infinity;
+      return av > bv ? dir : av < bv ? -dir : 0;
+    }});
+    renderTable();
+    document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.field === field));
+  }}
+
+  function openDetail(row) {{
+    document.getElementById('detail-title').textContent = `${{row.symbol}} · ${{row.name}}`;
+    document.getElementById('detail-meta').textContent = `${{row.units.toFixed(2)}} units · ${{fmtMoney(row.currentValue)}} current value`;
+    const tvSymbol = encodeURIComponent(row.symbol);
+    document.getElementById('detail-body').innerHTML = `
+      <div style="margin-bottom:12px;font-size:13px;color:#94a3b8;">
+        Δ vs buy <span class="${{row.pctVsBuy >=0 ? 'badge-profit' : 'badge-loss'}}">${{fmtPct(row.pctVsBuy)}}</span> ·
+        Today <span class="${{row.dayPct >=0 ? 'badge-profit' : 'badge-loss'}}">${{fmtMoney(row.dayChange)}} (${{fmtPct(row.dayPct)}})</span>
+      </div>
+      <iframe style="width:100%;height:420px;border:0;border-radius:12px;background:#0b111f;"
+        src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_${{tvSymbol}}&symbol=${{tvSymbol}}&interval=60&hidetoptoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=dark"
+        loading="lazy"></iframe>`;
+    document.getElementById('detail-modal').style.display = 'flex';
+  }}
+
+  document.getElementById('detail-close').addEventListener('click', () => {{
+    document.getElementById('detail-modal').style.display = 'none';
+  }});
+  document.getElementById('detail-modal').addEventListener('click', (e) => {{
+    if (e.target.id === 'detail-modal') {{
+      e.currentTarget.style.display = 'none';
+    }}
+  }});
+
+  document.getElementById('search').addEventListener('input', (e) => applyFilter(e.target.value));
+  document.querySelectorAll('.sort-btn').forEach(btn => {{
+    btn.addEventListener('click', () => applySort(btn.dataset.field));
+  }});
+
+  function chunk(array, size) {{
+    const chunks = [];
+    for (let i = 0; i < array.length; i += size) chunks.push(array.slice(i, i + size));
+    return chunks;
+  }}
+
+  async function refreshLiveQuotes() {{
+    const alertBar = document.getElementById('alert');
+    try {{
+      const symbols = data.map(d => d.symbol).filter(Boolean);
+      const groups = chunk(symbols, 20);
+      for (const group of groups) {{
+        const query = group.join(',');
+        const resp = await fetch(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${{query}}`);
+        if (!resp.ok) continue;
+        const payload = await resp.json();
+        payload.quoteResponse.result.forEach(item => {{
+          const sym = item.symbol?.toUpperCase();
+          const record = data.find(d => d.symbol === sym);
+          if (!record) return;
+          const price = item.regularMarketPrice;
+          if (price != null) {{
+            record.current = price;
+            record.currentValue = price * record.units;
+          }}
+          if (item.previousClose) {{
+            record.dayChange = price - item.previousClose;
+            record.dayPct = ((record.dayChange) / item.previousClose) * 100;
+          }}
+          if (record.buy) {{
+            record.pctVsBuy = ((record.current - record.buy) / record.buy) * 100;
+          }}
+        }});
+      }}
+      applySort(currentSort?.field || 'pctVsBuy', true);
+      alertBar.textContent = `Quotes refreshed ${{new Date().toLocaleTimeString()}}`;
+    }} catch (err) {{
+      alertBar.textContent = 'Live quote refresh failed; using last known values.';
+    }}
+  }}
+
+  renderTable();
+  applySort('pctVsBuy', true);
+  refreshLiveQuotes();
+  setInterval(refreshLiveQuotes, 60000);
+  </script>
 </body>
 </html>"""
+    ).format(
+        generated_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S ET"),
+        holding_count=len(view_df),
+        total_cost=money_format(total_cost),
+        total_value=money_format(total_value),
+        total_gain=money_format(total_gain),
+        pct_gain=pct_gain,
+        data_json=json.dumps(interactive_records)
+    )
 
-    SUMMARY.write_text("\n".join(summary_lines), encoding="utf-8")
     OUTPUT.write_text(html, encoding="utf-8")
 
 
