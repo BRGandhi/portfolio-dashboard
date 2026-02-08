@@ -1,4 +1,5 @@
 import json
+import math
 from datetime import datetime
 from pathlib import Path
 from textwrap import dedent
@@ -117,6 +118,19 @@ def load_notes():
     return {}
 
 
+def clean_for_json(value):
+    if isinstance(value, dict):
+        return {k: clean_for_json(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [clean_for_json(v) for v in value]
+    if isinstance(value, float):
+        if math.isnan(value) or math.isinf(value):
+            return None
+    if isinstance(value, (pd.Series, pd.Index, pd.Timestamp)):
+        return clean_for_json(value.tolist())
+    return value
+
+
 def build():
     df = pd.read_excel(SOURCE)
     df["Symbol_clean"] = df["Symbol"].astype(str).str.strip().str.upper()
@@ -160,7 +174,9 @@ def build():
 
     total_cost = holdings["CostBasis"].sum(min_count=1) or 0
     total_value = holdings["CurrentValue"].sum(min_count=1) or 0
-    day_move = holdings["DayDollar"].sum(min_count=1) or 0
+    day_move = holdings["DayDollar"].sum(min_count=1)
+    if pd.isna(day_move):
+        day_move = 0
     pct_gain = ((total_value - total_cost) / total_cost * 100) if total_cost else 0
 
     notes = load_notes()
@@ -211,10 +227,10 @@ def build():
     generated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
     top_symbol = records[-1]["symbol"] if records else "—"
 
-    records_json = json.dumps(records)
-    attention_json = json.dumps(attention_sorted[:10])
-    winners_json = json.dumps(top_winners)
-    losers_json = json.dumps(top_losers)
+    records_json = json.dumps(clean_for_json(records))
+    attention_json = json.dumps(clean_for_json(attention_sorted[:10]))
+    winners_json = json.dumps(clean_for_json(top_winners))
+    losers_json = json.dumps(clean_for_json(top_losers))
 
     template = dedent(
         """<!doctype html>
