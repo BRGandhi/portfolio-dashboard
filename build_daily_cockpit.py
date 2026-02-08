@@ -1,5 +1,6 @@
 import json
 import math
+import numbers
 from datetime import datetime
 from pathlib import Path
 from textwrap import dedent
@@ -123,11 +124,14 @@ def clean_for_json(value):
         return {k: clean_for_json(v) for k, v in value.items()}
     if isinstance(value, list):
         return [clean_for_json(v) for v in value]
-    if isinstance(value, float):
-        if math.isnan(value) or math.isinf(value):
-            return None
-    if isinstance(value, (pd.Series, pd.Index, pd.Timestamp)):
+    if isinstance(value, (pd.Series, pd.Index)):
         return clean_for_json(value.tolist())
+    if isinstance(value, pd.Timestamp):
+        return value.isoformat()
+    if isinstance(value, numbers.Number):
+        if pd.isna(value) or math.isinf(value):
+            return None
+        return float(value)
     return value
 
 
